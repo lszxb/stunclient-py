@@ -1,2 +1,2 @@
 # stunclient-py
-This is a STUN client writen by python3.
+This is a STUN client written by python3.
