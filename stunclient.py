@@ -23,7 +23,7 @@ def address_parse(value):
 
 
 def software_parse(value):
-    return bitstring.Bits(bin=value).bytes.decode("utf-8")
+    return bitstring.Bits(bin=value[:-8]).bytes.decode("utf-8")
 
 
 attributesTypes = {"0001": "MAPPED-ADDRESS", "0002": "RESPONSE-ADDRESS", "0003": "CHANGE-ADDRESS",
