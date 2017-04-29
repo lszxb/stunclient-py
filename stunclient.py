@@ -4,15 +4,37 @@ import random
 import socket
 import sys
 
-import bitstring
+from bitstring import Bits
+
+address = (sys.argv[1], int(sys.argv[2]))
+bindingRequest = Bits(hex="0x0001")
+messageLength = Bits(hex="0x0000")
+magicCookie = Bits(hex="0x2112A442")
+transactionID = Bits(uint=random.randint(0, 2 ** 96 - 1), length=96)
+
+print("TransactionID: " + transactionID.hex)
+
+request = bindingRequest + messageLength + magicCookie + transactionID
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.sendto(request.bytes, address)
+response = Bits(bytes=s.recv(1024))
 
 
 def bin2hex(binary):
-    return bitstring.Bits(bin=binary).hex
+    return Bits(bin=binary).hex
 
 
 def bin2int(binary):
-    return bitstring.Bits(bin=binary).uint
+    return Bits(bin=binary).uint
+
+
+def xor_address_parse(value):
+    Bits(bin=value[16:32]) ^ Bits(hex="0x2112")
+    Bits(bin=value[32:64]) ^ Bits(hex="0x2112A442")
+    return address_parse(((Bits(bin=value[0:16])) +
+                          (Bits(bin=value[16:32]) ^ Bits(bin=magicCookie.bin[0:16])) +
+                          (Bits(bin=value[32:64]) ^ magicCookie)).bin)
 
 
 def address_parse(value):
@@ -23,7 +45,7 @@ def address_parse(value):
 
 
 def software_parse(value):
-    return bitstring.Bits(bin=value).bytes.decode("utf-8").split("\x00")[0]
+    return Bits(bin=value).bytes.decode("utf-8").split("\x00")[0]
 
 
 attributesTypes = {"0001": "MAPPED-ADDRESS", "0002": "RESPONSE-ADDRESS", "0003": "CHANGE-ADDRESS",
@@ -32,7 +54,7 @@ attributesTypes = {"0001": "MAPPED-ADDRESS", "0002": "RESPONSE-ADDRESS", "0003":
                    "000B": "REFLECTED-FROM", "0014": "REALM", "0015": "NONCE", "0020": "XOR-MAPPED-ADDRESS",
                    "8020": "XOR-MAPPED-ADDRESS", "8022": "SOFTWARE", "8023": "ALTERNATE-SERVER", "8028": "FINGERPRINT"}
 attributesTypesParse = {"MAPPED-ADDRESS": address_parse, "SOFTWARE": software_parse, "SOURCE-ADDRESS": address_parse,
-                        "CHANGED-ADDRESS": address_parse}
+                        "CHANGED-ADDRESS": address_parse, "XOR-MAPPED-ADDRESS": xor_address_parse}
 
 
 def attributes_parse(binary):
@@ -53,19 +75,5 @@ def attributes_parse(binary):
         i += 32 + attribute_length
     return attributes
 
-
-address = (sys.argv[1], int(sys.argv[2]))
-bindingRequest = bitstring.Bits(hex="0x0001")
-messageLength = bitstring.Bits(hex="0x0000")
-magicCookie = bitstring.Bits(hex="0x2112A442")
-transactionID = bitstring.Bits(uint=random.randint(0, 2 ** 96 - 1), length=96)
-
-print("TransactionID: " + transactionID.hex)
-
-request = bindingRequest + messageLength + magicCookie + transactionID
-
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.sendto(request.bytes, address)
-response = bitstring.Bits(bytes=s.recv(1024))
 
 print(attributes_parse(response.bin[160:]))
