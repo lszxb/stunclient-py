@@ -30,8 +30,6 @@ def bin2int(binary):
 
 
 def xor_address_parse(value):
-    Bits(bin=value[16:32]) ^ Bits(hex="0x2112")
-    Bits(bin=value[32:64]) ^ Bits(hex="0x2112A442")
     return address_parse(((Bits(bin=value[0:16])) +
                           (Bits(bin=value[16:32]) ^ Bits(bin=magicCookie.bin[0:16])) +
                           (Bits(bin=value[32:64]) ^ magicCookie)).bin)
