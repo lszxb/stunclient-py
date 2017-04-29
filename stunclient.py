@@ -56,9 +56,11 @@ attributesTypes = {"0001": "MAPPED-ADDRESS", "0002": "RESPONSE-ADDRESS", "0003":
                    "0004": "SOURCE-ADDRESS", "0005": "CHANGED-ADDRESS", "0006": "USERNAME", "0007": "PASSWORD",
                    "0008": "MESSAGE-INTEGRITY", "0009": "ERROR-CODE", "000A": "UNKNOWN-ATTRIBUTES",
                    "000B": "REFLECTED-FROM", "0014": "REALM", "0015": "NONCE", "0020": "XOR-MAPPED-ADDRESS",
-                   "8020": "XOR-MAPPED-ADDRESS", "8022": "SOFTWARE", "8023": "ALTERNATE-SERVER", "8028": "FINGERPRINT"}
+                   "8020": "XOR-MAPPED-ADDRESS", "8022": "SOFTWARE", "8023": "ALTERNATE-SERVER", "8028": "FINGERPRINT",
+                   "802b": "RESPONSE-ORIGIN", "802c": "OTHER-ADDRESS"}
 attributesTypesParse = {"MAPPED-ADDRESS": address_parse, "SOFTWARE": software_parse, "SOURCE-ADDRESS": address_parse,
-                        "CHANGED-ADDRESS": address_parse, "XOR-MAPPED-ADDRESS": xor_address_parse}
+                        "CHANGED-ADDRESS": address_parse, "XOR-MAPPED-ADDRESS": xor_address_parse,
+                        "RESPONSE-ORIGIN": address_parse, "OTHER-ADDRESS": address_parse}
 
 
 def attributes_parse(binary):
