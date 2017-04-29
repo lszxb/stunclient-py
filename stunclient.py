@@ -6,7 +6,13 @@ import sys
 
 from bitstring import Bits
 
-address = (sys.argv[1], int(sys.argv[2]))
+defaultPort = 3478
+if len(sys.argv) == 2:
+    address = (sys.argv[1], defaultPort)
+elif len(sys.argv) == 3:
+    address = (sys.argv[1], int(sys.argv[2]))
+else:
+    exit(1)
 bindingRequest = Bits(hex="0x0001")
 messageLength = Bits(hex="0x0000")
 magicCookie = Bits(hex="0x2112A442")
