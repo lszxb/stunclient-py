@@ -11,7 +11,7 @@ addressList = []
 if len(sys.argv) < 2:
     exit(1)
 
-for arg in sys.argv:
+for arg in sys.argv[1:]:
     if len(arg.split(':')) == 1:
         addressList.append((arg.split(':')[0], defaultPort))
     elif len(arg.split(':')) == 2:
@@ -79,7 +79,7 @@ def attributes_parse(binary):
         i += 32 + attribute_length
     return attributes
 
-def get_ip(address)
+def get_ip(address):
     transactionID = Bits(uint=random.randint(0, 2 ** 96 - 1), length=96)
     
     print("TransactionID: " + transactionID.hex)
