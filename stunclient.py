@@ -7,24 +7,22 @@ import sys
 from bitstring import Bits
 
 defaultPort = 3478
-if len(sys.argv) == 2:
-    address = (sys.argv[1], defaultPort)
-elif len(sys.argv) == 3:
-    address = (sys.argv[1], int(sys.argv[2]))
-else:
+addressList = []
+if len(sys.argv) < 2:
     exit(1)
+
+for arg in sys.argv:
+    if len(arg.split(':')) == 1:
+        addressList.append((arg.split(':')[0], defaultPort))
+    elif len(arg.split(':')) == 2:
+        addressList.append((arg.split(':')[0], int(arg.split(':')[1])))
+    else:
+        exit(2)
+
 bindingRequest = Bits(hex="0x0001")
 messageLength = Bits(hex="0x0000")
 magicCookie = Bits(hex="0x2112A442")
-transactionID = Bits(uint=random.randint(0, 2 ** 96 - 1), length=96)
-
-print("TransactionID: " + transactionID.hex)
-
-request = bindingRequest + messageLength + magicCookie + transactionID
-
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.sendto(request.bytes, address)
-response = Bits(bytes=s.recv(1024))
 
 
 def bin2hex(binary):
@@ -81,5 +79,17 @@ def attributes_parse(binary):
         i += 32 + attribute_length
     return attributes
 
-
-print(attributes_parse(response.bin[160:]))
+def get_ip(address)
+    transactionID = Bits(uint=random.randint(0, 2 ** 96 - 1), length=96)
+    
+    print("TransactionID: " + transactionID.hex)
+    
+    request = bindingRequest + messageLength + magicCookie + transactionID
+    
+    s.sendto(request.bytes, address)
+    response = Bits(bytes=s.recv(1024))
+    
+    print(attributes_parse(response.bin[160:]))
+    
+for address in addressList:
+    get_ip(address)
