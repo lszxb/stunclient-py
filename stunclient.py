@@ -89,7 +89,13 @@ def get_ip(address):
     s.sendto(request.bytes, address)
     response = Bits(bytes=s.recv(1024))
     
-    print(attributes_parse(response.bin[160:]))
+    attributes = attributes_parse(response.bin[160:])
+    for a in attributes:
+        print(a+": "+attributes[a]["ip"]+":"+str(attributes[a]["port"]))
     
 for address in addressList:
+    print("Address: "+address[0]+":"+str(address[1]))
     get_ip(address)
+    print("")
+
+print("Done!")
