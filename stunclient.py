@@ -91,7 +91,10 @@ def get_ip(address):
     
     attributes = attributes_parse(response.bin[160:])
     for a in attributes:
-        print(a+": "+attributes[a]["ip"]+":"+str(attributes[a]["port"]))
+        if "ip" in attributes[a]:
+            print(a+": "+attributes[a]["ip"]+":"+str(attributes[a]["port"]))
+        else:
+            print(a+": "+attributes[a])
     
 for address in addressList:
     print("Address: "+address[0]+":"+str(address[1]))
