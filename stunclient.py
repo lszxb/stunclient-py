@@ -62,7 +62,7 @@ def attributes_parse(binary):
     return attribute
 
 
-def get_ip(addr, s):
+def get_ip(addr, s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
     bindingRequest = Bits(hex="0x0001")
     messageLength = Bits(hex="0x0000")
     magicCookie = Bits(hex="0x2112A442")
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     for address in addressList:
         print("Address: " + address[0] + ":" + str(address[1]))
-        attributes = get_ip(address, socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
+        attributes = get_ip(address)
         for a in attributes:
             if "ip" in attributes[a]:
                 print(a + ": " + attributes[a]["ip"] + ":" + str(attributes[a]["port"]))
