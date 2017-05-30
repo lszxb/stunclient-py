@@ -3,26 +3,7 @@
 import random
 import socket
 import sys
-
 from bitstring import Bits
-
-defaultPort = 3478
-addressList = []
-if len(sys.argv) < 2:
-    exit(1)
-
-for arg in sys.argv[1:]:
-    if len(arg.split(':')) == 1:
-        addressList.append((arg.split(':')[0], defaultPort))
-    elif len(arg.split(':')) == 2:
-        addressList.append((arg.split(':')[0], int(arg.split(':')[1])))
-    else:
-        exit(2)
-
-bindingRequest = Bits(hex="0x0001")
-messageLength = Bits(hex="0x0000")
-magicCookie = Bits(hex="0x2112A442")
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
 def bin2hex(binary):
@@ -34,6 +15,7 @@ def bin2int(binary):
 
 
 def xor_address_parse(value):
+    magicCookie = Bits(hex="0x2112A442")
     return address_parse(((Bits(bin=value[0:16])) +
                           (Bits(bin=value[16:32]) ^ Bits(bin=magicCookie.bin[0:16])) +
                           (Bits(bin=value[32:64]) ^ magicCookie)).bin)
@@ -64,7 +46,7 @@ attributesTypesParse = {"MAPPED-ADDRESS": address_parse, "SOFTWARE": software_pa
 def attributes_parse(binary):
     i = 0
     length = len(binary)
-    attributes = {}
+    attribute = {}
     while i < length:
         if bin2hex(binary[i + 0:i + 16]) in attributesTypes:
             attribute_type = attributesTypes[bin2hex(binary[i + 0:i + 16])]
@@ -73,32 +55,47 @@ def attributes_parse(binary):
         attribute_length = bin2int(binary[i + 16:i + 32]) * 8
         attribute_value = binary[i + 32:i + 32 + attribute_length]
         if attribute_type in attributesTypesParse:
-            attributes[attribute_type] = attributesTypesParse[attribute_type](attribute_value)
+            attribute[attribute_type] = attributesTypesParse[attribute_type](attribute_value)
         else:
-            attributes[attribute_type] = bin2hex(attribute_value)
+            attribute[attribute_type] = bin2hex(attribute_value)
         i += 32 + attribute_length
-    return attributes
+    return attribute
 
-def get_ip(address):
+
+def get_ip(addr, s):
+    bindingRequest = Bits(hex="0x0001")
+    messageLength = Bits(hex="0x0000")
+    magicCookie = Bits(hex="0x2112A442")
     transactionID = Bits(uint=random.randint(0, 2 ** 96 - 1), length=96)
-    
-    print("TransactionID: " + transactionID.hex)
-    
     request = bindingRequest + messageLength + magicCookie + transactionID
-    
-    s.sendto(request.bytes, address)
-    response = Bits(bytes=s.recv(1024))
-    
-    attributes = attributes_parse(response.bin[160:])
-    for a in attributes:
-        if "ip" in attributes[a]:
-            print(a+": "+attributes[a]["ip"]+":"+str(attributes[a]["port"]))
-        else:
-            print(a+": "+attributes[a])
-    
-for address in addressList:
-    print("Address: "+address[0]+":"+str(address[1]))
-    get_ip(address)
-    print("")
 
-print("Done!")
+    s.sendto(request.bytes, addr)
+    response = Bits(bytes=s.recv(1024))
+
+    return attributes_parse(response.bin[160:])
+
+
+if __name__ == "__main__":
+    defaultPort = 3478
+    addressList = []
+    if len(sys.argv) < 2:
+        exit(1)
+
+    for arg in sys.argv[1:]:
+        if len(arg.split(':')) == 1:
+            addressList.append((arg.split(':')[0], defaultPort))
+        elif len(arg.split(':')) == 2:
+            addressList.append((arg.split(':')[0], int(arg.split(':')[1])))
+        else:
+            exit(2)
+
+    for address in addressList:
+        print("Address: " + address[0] + ":" + str(address[1]))
+        attributes = get_ip(address, socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
+        for a in attributes:
+            if "ip" in attributes[a]:
+                print(a + ": " + attributes[a]["ip"] + ":" + str(attributes[a]["port"]))
+            else:
+                print(a + ": " + attributes[a])
+        print("")
+    print("Done!")
