@@ -1,10 +1,13 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python3
 
 import random
 import socket
 import sys
 from bitstring import Bits
 
+
+defaultHost = 'stun.miwifi.com'
+defaultPort = 3478
 
 def bin2hex(binary):
     return Bits(bin=binary).hex
@@ -76,10 +79,10 @@ def get_ip(addr, s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
 
 
 if __name__ == "__main__":
-    defaultPort = 3478
     addressList = []
     if len(sys.argv) < 2:
-        exit(1)
+        print('No address provided, default to "' + defaultHost + ':' + str(defaultPort) + '".')
+        addressList.append((defaultHost, defaultPort))
 
     for arg in sys.argv[1:]:
         if len(arg.split(':')) == 1:
@@ -87,7 +90,7 @@ if __name__ == "__main__":
         elif len(arg.split(':')) == 2:
             addressList.append((arg.split(':')[0], int(arg.split(':')[1])))
         else:
-            exit(2)
+            exit(1)
 
     for address in addressList:
         print("Address: " + address[0] + ":" + str(address[1]))
